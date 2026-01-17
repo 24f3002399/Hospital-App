@@ -1,0 +1,15 @@
+# Backend 
+Backend/.env/
+Backend/__pycache__/
+Backend/*.pyc
+Backend/instance/
+
+# Frontend 
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env
+
+# VS Code 
+.vscode/
+.DS_Store
+Thumbs.db

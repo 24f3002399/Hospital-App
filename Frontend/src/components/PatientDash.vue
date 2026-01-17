@@ -1,0 +1,153 @@
+<script>
+import axios from 'axios';
+
+export default {
+    data(){
+        return {
+            token: "",
+            userData: "" ,
+            message: "",
+            search_dept_for: "",
+            search_apt_by: "upcoming"
+        }
+    },
+    mounted(){
+        this.loadToken()
+        this.loadUser()
+    },
+    methods: {
+        loadToken: function (){
+            const token = localStorage.getItem("token");
+            if (token){
+                this.token = token;
+            }
+        },
+        loadUser: function() {
+            const response = axios.get("http://127.0.0.1:5000/api/dashboard", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${this.token}` 
+                }
+            })
+            response
+            .then(res => {
+                   this.userData = res.data;
+            }).catch(err => this.error = err.response.data.message)
+        }
+    },
+    computed: {
+        department(){
+            if (!this.userData.dept_detail) {
+                    return []; 
+                }
+
+            return this.userData.dept_detail.filter(depart => {
+                return depart.name.toLowerCase().includes(this.search_dept_for.toLowerCase())                   
+            })
+        },
+        Appointments(){
+
+            if (!this.userData.apnt_detail) {
+                    return []; 
+                }
+
+            return this.userData.apnt_detail.filter(apnt => {
+                if (this.search_apt_by === "upcoming") {
+                    return apnt.status == "booked" && new Date(apnt.date) >= new Date().setHours(0,0,0,0)             
+                }
+                else {
+                    return apnt.status !== "booked" 
+                }
+            })
+        }
+    }
+}
+</script>
+
+<template>
+    <div v-if="token">
+        <div class="dash">
+            <div style="margin-bottom: 20px;" class="row">
+                <div class="col-auto me-auto"><h3 style="color:darkorange; display: inline;"><b>Welcome {{ userData.user_name }}</b></h3></div>
+                <div class="col-auto" style="float: left;"><button class="btn btn-outline-success">Edit Profile</button></div>
+                <div class="col-auto"><button class="btn btn-outline-success">History</button></div>
+            </div>
+            <div class="row">
+                <div class="col-auto me-auto"><h2>Departments</h2></div>
+                <div class="col-auto">
+                    <input type="text" style="border-radius: 10px" v-model="search_dept_for" :placeholder="`search department...`">
+                </div>
+            </div>
+            <table class="table table-bordered" style="text-align: center;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="depart in department">
+                        <td>{{ depart.name }}</td>
+                        <td><div class="row justify-content-evenly">
+                                <div class="col-4">
+                                    <RouterLink :to="'/department/' + depart.name">
+                                        <button class="btn btn-info">View Details</button>
+                                    </RouterLink>
+                                </div>                              
+                            </div>
+                        </td>                       
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-auto me-auto"><h2>Appointment</h2></div>
+                <div class="col-auto">
+                    <select style="width: 300px; border-radius: 10px; margin-right: 50px;" v-model="search_apt_by" >
+                        <option value="upcoming">Upcoming Appointment</option> 
+                        <option value="past">Past Appointment</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table class="table table-bordered" style="text-align: center;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Doctor Name</th>
+                        <th>Department</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="apt in Appointments">
+                        <td>{{ apt.id }}</td>
+                        <td>{{ apt.doct_name }}</td>
+                        <td>{{ apt.dept_name }}</td>
+                        <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
+                        <td>{{ apt.time }}</td>
+                        <td><div class="row justify-content-evenly">
+                                <div class="col-4">
+                                <RouterLink to="/register">
+                                    <button class="btn btn-danger">Cancle</button>
+                                </RouterLink></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div v-else>
+        <h1>Please Login</h1>
+    </div>
+</template>
+
+<style scoped>
+    .dash{
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+</style>
