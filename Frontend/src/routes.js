@@ -12,6 +12,9 @@ import PatientDash from "./components/PatientDash.vue";
 import DoctorDt from "./components/DoctorDt.vue";
 import Department from "./components/Department.vue";
 import Book from "./components/Book.vue";
+import Treatment from "./components/Treatment.vue";
+import AdminChangeAv from "./components/AdminChangeAv.vue";
+import PatientDt from "./components/PatientDt.vue";
 
 
 
@@ -28,6 +31,9 @@ const routes = [
     {path:"/doctordt/:id", component:DoctorDt},
     {path: "/department/:name", component: Department},
     {path: "/book/:id", component: Book},
+    {path: "/treatment/:id", component: Treatment},
+    {path: "/adminchangeav/:id", component: AdminChangeAv},
+    {path: "/patientdt/:id", component: PatientDt},
     {path: "/admindash", component: AdminDash
         // [
         // {path: "", component: AdminDash},

@@ -9,9 +9,8 @@
         <div style="text-align: center;">
         <input type="submit" class="btn btn-success" value="Update"> <br></div>
         <div style="text-align: center; padding: 10px;" >
-            <RouterLink to="/admindash">
-                <button class="btn btn-secondary">Go Back</button>
-            </RouterLink></div>
+                <button @click="$router.go(-1)" class="btn btn-secondary">Go Back</button>
+        </div>
         <!-- <button @click="" class="btn btn-primary">Add</button> <br> -->
 
         <div v-if="message" class="alert" :class="message.includes('success') ? 'alert-success' : 'alert-danger'">

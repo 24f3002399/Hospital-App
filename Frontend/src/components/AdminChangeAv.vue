@@ -6,7 +6,6 @@ export default {
         return {
             mess: "",
             slot_detail: "",
-            doctor_id: null
         }
     },
     mounted(){
@@ -14,7 +13,7 @@ export default {
     },
     methods: {
         Slot: function() {
-            const response = axios.post(`http://127.0.0.1:5000/api/provide_av/${this.$route.params.id}`,{},{
+            const response = axios.get(`http://127.0.0.1:5000/api/slot_dt/${this.$route.params.id}`,{
                 headers: {
                     "Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*",
@@ -44,7 +43,6 @@ export default {
             this.Slot()
             this.mess = "Availability Provide Successfully"
         }
-        
     }
 }
 </script>
@@ -86,9 +84,7 @@ export default {
     </ul>
     <div style="text-align: center;">
         <button @click="Save" class="btn btn-success" style="margin-right: 10px;">Save</button> 
-        <RouterLink to="/doctordash" >
-            <button class="btn btn-info">Go Back</button>
-        </RouterLink>
+            <button @click="$router.go(-1)" class="btn btn-info">Go Back</button>
     </div>
     </div>
     <div v-if="mess" class="alert" >

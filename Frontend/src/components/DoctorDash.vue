@@ -47,6 +47,29 @@ export default {
                    this.doctorId = res.data.doctor_id
             }).catch(err => this.error = err.response.data.message)
 
+        },
+        Cancel: function(c_id) {
+            const response = axios.post(`http://127.0.0.1:5000/api/cancel/${c_id}`, {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
+            response
+            .then(res => {
+                    this.message = res.data.message
+                    alert("Cancel successfully")
+                    this.loadUser()
+            }).catch(err => this.error = err.response.data.message)
+        },
+        Ask_cancel: function(c_id) {
+            const result = confirm("Are you want to cancel this appointment");
+            if (result) {
+                this.Cancel(c_id)                
+            } else {
+                console.log("Denied")
+            }
         }
     },
     computed: {
@@ -67,7 +90,7 @@ export default {
     <div v-if="token" class="dash">
         <h1>Doctor {{ userData.user_name }}</h1>
         <div class="row">
-            <div class="col-auto me-auto"><h2>Registered Patient {{  }}</h2></div>
+            <div class="col-auto me-auto"><h2>Assigned Patients </h2></div>
         </div>
         <table class="table table-bordered">
             <tbody>
@@ -75,7 +98,7 @@ export default {
                     <td>{{ patient.name }}</td>
                     <td>
                         <div style="text-align: center;">
-                            <RouterLink :to="'/doctordt/' + patient.user_id" >
+                            <RouterLink :to="'/patientdt/' + patient.user_id" >
                                 <button class="btn btn-warning">View</button>
                             </RouterLink>
                         </div>
@@ -84,24 +107,33 @@ export default {
             </tbody>
         </table>
         <div class="row">
-            <div class="col-auto me-auto"><h2>Upcoming Appointment</h2></div>
+            <div class="col-auto me-auto"><h2>Upcoming Appointments</h2></div>
         </div> 
-        <table class="table table-bordered">
+        <table class="table table-bordered" style="text-align: center;">
+            <thead>
+                <tr>
+                        <th>ID</th>
+                        <th>Patient Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+            </thead>
             <tbody>
                 <tr v-for="apt in Appointments">
                     <td>{{ apt.id }}</td>
+                    <td>{{ apt.pt_name }}</td>
+                    <td>{{ apt.date.split(' ').slice(1, 4).join(' ')}}</td>
+                    <td>{{ apt.time }}</td>
                     <td><div class="row justify-content-evenly">
-                            <div class="col-4"><RouterLink to="/register">
-                                <button class="btn btn-primary">View</button>
-                            </RouterLink></div>
                             <div class="col-4">
-                            <RouterLink to="/register">
-                                <button class="btn btn-primary">View</button>
-                            </RouterLink></div>
+                                <RouterLink :to="'/treatment/' + apt.id">
+                                    <button class="btn btn-info">Mark as complete</button>
+                                </RouterLink>
+                            </div>
                             <div class="col-4">
-                            <RouterLink to="/register">
-                                <button class="btn btn-primary">View</button>
-                            </RouterLink></div>
+                                <button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button>
+                            </div>
                         </div>
                     </td>
                 </tr>

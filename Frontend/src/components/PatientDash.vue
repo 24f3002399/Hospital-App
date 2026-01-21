@@ -34,6 +34,29 @@ export default {
             .then(res => {
                    this.userData = res.data;
             }).catch(err => this.error = err.response.data.message)
+        },
+        Cancel: function(c_id) {
+            const response = axios.post(`http://127.0.0.1:5000/api/cancel/${c_id}`, {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
+            response
+            .then(res => {
+                    this.message = res.data.message
+                    alert("Cancel successfully")
+                    this.loadUser()
+            }).catch(err => this.error = err.response.data.message)
+        },
+        Ask_cancel: function(c_id) {
+            const result = confirm("Are you want to cancel this appointment");
+            if (result) {
+                this.Cancel(c_id)                
+            } else {
+                console.log("Denied")
+            }
         }
     },
     computed: {
@@ -70,7 +93,11 @@ export default {
         <div class="dash">
             <div style="margin-bottom: 20px;" class="row">
                 <div class="col-auto me-auto"><h3 style="color:darkorange; display: inline;"><b>Welcome {{ userData.user_name }}</b></h3></div>
-                <div class="col-auto" style="float: left;"><button class="btn btn-outline-success">Edit Profile</button></div>
+                <div class="col-auto" style="float: left;">
+                    <RouterLink :to="'/editpat/' + userData.patient_id">
+                    <button class="btn btn-outline-success">Edit Profile</button>
+                    </RouterLink>
+                </div>
                 <div class="col-auto"><button class="btn btn-outline-success">History</button></div>
             </div>
             <div class="row">
@@ -129,10 +156,12 @@ export default {
                         <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
                         <td>{{ apt.time }}</td>
                         <td><div class="row justify-content-evenly">
-                                <div class="col-4">
-                                <RouterLink to="/register">
-                                    <button class="btn btn-danger">Cancle</button>
-                                </RouterLink></div>
+                                <div class="col-4" v-if="apt.status == 'booked'">
+                                    <button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button>
+                                </div>
+                                <div class="col-4" v-else>
+                                    <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
+                                </div>
                             </div>
                         </td>
                     </tr>

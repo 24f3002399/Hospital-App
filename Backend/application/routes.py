@@ -9,12 +9,12 @@ from celery.result import AsyncResult
 from .tasks import csv_report, monthly_report, generate_msg
 from datetime import date, timedelta, datetime
 
-def role_required(required_role):
+def role_required(*roles):
     def wrapper(fn):
         @wraps(fn)
         @jwt_required()
         def decorator(*args, **kwargs):
-            if current_user.role != required_role:
+            if current_user.role not in roles:
                 return jsonify(massage = "You are not authorized"), 403
             return fn(*args, **kwargs)
         return decorator
@@ -67,6 +67,8 @@ def dashboard():
             appt_detail["doct_name"] = appointment.doctor.name
             appt_detail["dept_name"] = appointment.doctor.department
             appt_detail["status"] = appointment.status
+            appt_detail["date"] = appointment.date
+            appt_detail["time"] = appointment.time
             apnt_json.append(appt_detail)
 
         return jsonify({
@@ -81,13 +83,14 @@ def dashboard():
 
     elif current_user.role == "doctor":
         doctor_id = (Doctor.query.filter_by(user_id = current_user.id).first()).doctor_id
-        patient = Patient.query.all()
+        patient = Patient.query.join(Appointment).filter(Appointment.doctor_id == doctor_id).distinct().all()
         appointment = Appointment.query.filter_by(status = "booked", doctor_id = doctor_id).all()
         reg_pat_json = []
         apnt_json = []
         for patient in patient:
             pant_detail = {}
             pant_detail["name"] = patient.name
+            pant_detail["user_id"] = patient.user_id
             reg_pat_json.append(pant_detail)
 
         for appointment in appointment:
@@ -130,6 +133,7 @@ def dashboard():
 
         return jsonify({
             "role": "patient",
+            "user_id": current_user.id,
             "status": current_user.status,
             "patient_id": patient_id,
             "user_name": current_user.name,
@@ -214,10 +218,11 @@ def editdoct(id):
     return jsonify(message = "edit successfully")
 
 @app.route("/api/editpat/<int:id>" ,methods = ["GET", "POST"])
-@role_required("admin")
+@jwt_required()
 def editpat(id):
-    user = Users.query.filter_by(id = id).first()
-    patient = Patient.query.filter_by(user_id = id).first()
+    patient = Patient.query.filter_by(patient_id = id).first()
+    user_id = patient.user_id
+    user = Users.query.filter_by(id = user_id).first()
 
     if request.method == "POST":
         user.name = request.json.get("name", None)
@@ -325,7 +330,7 @@ def provide_av(id):
         return jsonify(message = "Doctor does not exist")
     
 @app.route("/api/change/<int:doctor_id>/<int:id>/<int:st>",methods = ["POST"])
-@role_required("doctor")
+@role_required("doctor", "admin")
 def save(doctor_id, id, st):   
     slot = Slots.query.filter_by(doctor_id = doctor_id , id = id).first()
     if request.method == "POST":
@@ -374,13 +379,46 @@ def detail(id):
         
         if user.role == "patient":
             patient = Patient.query.filter_by(user_id = id).first()
+            patient_id = patient.patient_id
+            appointment = Appointment.query.filter_by(patient_id = patient_id , status = "cancelled").all()
+            treatment = Treatment.query.join(Appointment).filter(Appointment.patient_id == patient_id).all()
+            
+            apnt_json = []
+            treat_json = []
+
+            for appointment in appointment:
+                appt_detail = {}
+                appt_detail["id"] = appointment.id
+                appt_detail["doct_name"] = appointment.doctor.name
+                appt_detail["dept_name"] = appointment.doctor.department
+                appt_detail["date"] = appointment.date
+                appt_detail["time"] = appointment.time
+                apnt_json.append(appt_detail)
+
+            for treatment in treatment:
+                treat_detail = {}
+                treat_detail["id"] = treatment.id
+                treat_detail["visit_type"] = treatment.visit_type
+                treat_detail["test_done"] = treatment.test_done
+                treat_detail["medicines"] = treatment.medicines
+                treat_detail["diagnosis"] = treatment.diagnosis
+                treat_detail["prescription"] = treatment.prescription
+                treat_detail["notes"] = treatment.notes
+                treat_detail["doctor"] = treatment.appointment.doctor.name
+                treat_detail["department"] = treatment.appointment.doctor.department
+                treat_json.append(treat_detail)
+
+
             pant_detail = {}
             pant_detail["status"] = patient.status
             pant_detail["name"] = patient.name
             pant_detail["user_id"] = patient.user_id
             pant_detail["id"] = patient.patient_id
+
             return jsonify({
-                "pant_detail": pant_detail
+                "pant_detail": pant_detail,
+                "appointment": apnt_json,
+                "treatment": treat_json
             })
     else:
         return jsonify(message = "User doesn't exists")
@@ -404,7 +442,7 @@ def dept_doctor(name):
 
 
 @app.route("/api/slot_dt/<int:id>")
-@role_required("patient")
+@role_required("patient" , "admin")
 def slot_dt(id):
     date1 = date.today()
     slot = Slots.query.filter_by(doctor_id = id).filter(Slots.date >= date1).all()
@@ -446,6 +484,78 @@ def book(doctor_id, patient_id, id, st, dates):
             db.session.add(appointment)
             db.session.commit()
     return jsonify(message = "Booked Successfully")
+
+
+@app.route("/api/cancel/<int:id>" ,methods = ["POST"])
+@jwt_required()
+def cancel(id):
+    appointment = Appointment.query.filter_by(id = id).first()
+    doctor_id = appointment.doctor_id
+    date = appointment.date
+    time = appointment.time
+    appointment.status = "cancelled"
+    slot = Slots.query.filter_by(doctor_id = doctor_id, date = date).first()
+    if time == "8 AM - 11 AM":
+        slot.slot1 = "available"
+        db.session.commit()
+
+    elif time == "1 PM - 4 PM":
+        slot.slot2 = "available"
+        db.session.commit()
+
+    else:
+        slot.slot3 = "available"
+        db.session.commit()
+
+    return jsonify(message = "Cancel successfully")
+
+@app.route("/api/treatment/<int:id>", methods = ["GET","POST"])
+@role_required("doctor")
+def treatment(id):
+    visit_type = request.json.get("visit_type",None)
+    test_done = request.json.get("test_done", None)
+    diagnosis = request.json.get("diagnosis", None)
+    prescription = request.json.get("prescription", None)
+    medicines = request.json.get("medicines", None)
+    notes = request.json.get("notes", None)
+
+    if request.method == "POST":
+        treatment = Treatment(appointment_id = id, visit_type = visit_type, test_done = test_done, diagnosis = diagnosis, prescription = prescription, medicines = medicines, notes = notes)
+        db.session.add(treatment)
+    
+        appointment = Appointment.query.filter_by(id = id).first()
+        doctor_id = appointment.doctor_id
+        date = appointment.date
+        time = appointment.time
+        appointment.status = "completed"
+        slot = Slots.query.filter_by(doctor_id = doctor_id, date = date).first()
+        if time == "8 AM - 11 AM":
+            slot.slot1 = "complete"
+            db.session.commit()
+
+        elif time == "1 PM - 4 PM":
+            slot.slot2 = "complete"
+            db.session.commit()
+
+        else:
+            slot.slot3 = "complete"
+            db.session.commit()
+
+        return jsonify(message = "Treatment successfully")
+
+
+@app.route("/api/apnt_dt/<int:id>")
+@role_required("doctor")
+def apnt_dt(id):  
+    appointment = Appointment.query.filter_by(id = id).first()
+    patient_name = appointment.patient.name
+    department = appointment.doctor.department
+
+    return jsonify({
+        "patient_name": patient_name,
+        "department": department
+    })
+
 
 
 

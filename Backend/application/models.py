@@ -1,5 +1,5 @@
 from .extentions import db
-from datetime import date, time
+from datetime import date, time  
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -22,9 +22,14 @@ class Appointment(db.Model):
 class Treatment(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     appointment_id = db.Column(db.Integer ,db.ForeignKey('appointment.id'))
+    visit_type = db.Column(db.String)
+    test_done = db.Column(db.String)
+    medicines = db.Column(db.String)
     diagnosis = db.Column(db.String)
     prescription = db.Column(db.String)
     notes = db.Column(db.String)
+    appointment = db.relationship("Appointment", backref="treatment_appoint")
+
 
 class Department(db.Model):
     department_id = db.Column(db.Integer, primary_key = True)
