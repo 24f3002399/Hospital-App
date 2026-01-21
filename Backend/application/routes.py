@@ -79,8 +79,6 @@ def dashboard():
             "apnt_detail": apnt_json
         })
 
-
-
     elif current_user.role == "doctor":
         doctor_id = (Doctor.query.filter_by(user_id = current_user.id).first()).doctor_id
         patient = Patient.query.join(Appointment).filter(Appointment.doctor_id == doctor_id).distinct().all()
@@ -120,6 +118,7 @@ def dashboard():
             appt_detail = {}
             appt_detail["id"] = appointment.id
             appt_detail["doct_name"] = appointment.doctor.name
+            appt_detail["doct_id"] = appointment.doctor.doctor_id
             appt_detail["dept_name"] = appointment.doctor.department
             appt_detail["date"] = appointment.date
             appt_detail["time"] = appointment.time
@@ -508,6 +507,29 @@ def cancel(id):
         db.session.commit()
 
     return jsonify(message = "Cancel successfully")
+
+@app.route("/api/reschedule/<int:id>" ,methods = ["POST"])
+@jwt_required()
+def reschedule(id):
+    appointment = Appointment.query.filter_by(id = id).first()
+    doctor_id = appointment.doctor_id
+    date = appointment.date
+    time = appointment.time
+    db.session.delete(appointment)
+    slot = Slots.query.filter_by(doctor_id = doctor_id, date = date).first()
+    if time == "8 AM - 11 AM":
+        slot.slot1 = "available"
+        db.session.commit()
+
+    elif time == "1 PM - 4 PM":
+        slot.slot2 = "available"
+        db.session.commit()
+
+    else:
+        slot.slot3 = "available"
+        db.session.commit()
+
+    return jsonify(message = "Rescheduled successfully")
 
 @app.route("/api/treatment/<int:id>", methods = ["GET","POST"])
 @role_required("doctor")

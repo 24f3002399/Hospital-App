@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="Edit">
+    <form>
         <h1>Edit</h1>
     
         <div class="mb-3">
@@ -23,12 +23,11 @@
             <input type="number" class="form-control" id="Input5" v-model="formData.exp_year" >
         </div>
         <div style="text-align: center;">
-        <input type="submit" class="btn btn-success" value="Update"> <br></div>
+            <button @click.prevent="Edit" class="btn btn-success">Update</button> <br>
+        </div>
         <div style="text-align: center; padding: 10px;" >
-            <RouterLink to="/admindash">
-                <button class="btn btn-secondary">Go Back</button>
-            </RouterLink></div>
-        <!-- <button @click="" class="btn btn-primary">Add</button> <br> -->
+            <button @click.prevent="$router.go(-1)" class="btn btn-info">Go Back</button>
+        </div>
 
         <div v-if="message" class="alert" :class="message.includes('success') ? 'alert-success' : 'alert-danger'">
             {{ message }}

@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="Treatment">
+    <form>
         <h1>Treatment</h1>
         <h4>Patient Name : {{ this.patient_name }}</h4>
         <h4>Department : {{ this.department }}</h4>
@@ -32,12 +32,10 @@
             <input type="text" class="form-control" id="Input6" v-model="formData.notes">
         </div>
         <div style="text-align: center;">
-        <input type="submit" class="btn btn-primary" value="Mark as Complete"> <br>
-        <!-- <button @click="" class="btn btn-primary">Add</button> <br> -->
+            <button @click.prevent="Treatment" class="btn btn-success">Mark as Complete</button> <br>
         </div>
-
         <div style="text-align: center; padding: 10px;" >
-                <button @click="$router.go(-1)" class="btn btn-info">Go Back</button>
+            <button @click.prevent="$router.go(-1)" class="btn btn-info">Go Back</button>
         </div>
 
         <div v-if="mess" class="alert" :class="mess.includes('success') ? 'alert-success' : 'alert-danger'">

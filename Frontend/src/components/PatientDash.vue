@@ -57,6 +57,29 @@ export default {
             } else {
                 console.log("Denied")
             }
+        },
+        Reschedule: function(a_id) {
+            const response = axios.post(`http://127.0.0.1:5000/api/reschedule/${a_id}`, {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
+            response
+            .then(res => {
+                    this.message = res.data.message
+            }).catch(err => this.error = err.response.data.message)
+        },
+        Ask_res: function(a_id, d_id) {
+            const result = confirm("Are you want to reschedule this appointment");
+            if (result) {
+                this.Reschedule(a_id)
+                this.$router.push('/book/' + d_id)
+
+            } else {
+                console.log("Denied")
+            }
         }
     },
     computed: {
@@ -98,7 +121,11 @@ export default {
                     <button class="btn btn-outline-success">Edit Profile</button>
                     </RouterLink>
                 </div>
-                <div class="col-auto"><button class="btn btn-outline-success">History</button></div>
+                <div class="col-auto">
+                    <RouterLink :to="'/patientdt/' + userData.user_id" >
+                        <button class="btn btn-outline-success">History</button>
+                    </RouterLink>
+                </div>
             </div>
             <div class="row">
                 <div class="col-auto me-auto"><h2>Departments</h2></div>
@@ -140,7 +167,7 @@ export default {
             <table class="table table-bordered" style="text-align: center;">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Sr. No.</th>
                         <th>Doctor Name</th>
                         <th>Department</th>
                         <th>Date</th>
@@ -149,19 +176,19 @@ export default {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="apt in Appointments">
-                        <td>{{ apt.id }}</td>
+                    <tr v-for="(apt, index) in Appointments">
+                        <td>{{ index + 1 }}</td>
                         <td>{{ apt.doct_name }}</td>
                         <td>{{ apt.dept_name }}</td>
                         <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
                         <td>{{ apt.time }}</td>
-                        <td><div class="row justify-content-evenly">
-                                <div class="col-4" v-if="apt.status == 'booked'">
-                                    <button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button>
-                                </div>
-                                <div class="col-4" v-else>
-                                    <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
-                                </div>
+                        <td>
+                            <div class="row justify-content-evenly" v-if="apt.status == 'booked' && search_apt_by == 'upcoming'">
+                                <div class="col-4"><button @click="Ask_res(apt.id, apt.doct_id)" class="btn btn-warning">Reschedule</button></div>
+                                <div class="col-4"><button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button></div>
+                            </div>
+                            <div class="justify-content-evenly" v-else>
+                                <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
                             </div>
                         </td>
                     </tr>

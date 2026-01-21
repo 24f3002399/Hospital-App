@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="addDoctor">
+    <form>
         <h1>Add a new Doctor</h1>
         <div class="mb-3">
             <label for="Input1" class="form-label">Email</label>
@@ -30,14 +30,10 @@
             <input type="number" class="form-control" id="Input7" v-model="formData.exp_year" >
         </div>
         <div style="text-align: center;">
-        <input type="submit" class="btn btn-primary" value="Add"> <br>
-        <!-- <button @click="" class="btn btn-primary">Add</button> <br> -->
+            <button @click.prevent="addDoctor" class="btn btn-success">Add Doctor</button> <br>
         </div>
-
         <div style="text-align: center; padding: 10px;" >
-            <RouterLink to="/admindash">
-                <button class="btn btn-info">Go Back</button>
-            </RouterLink>
+            <button @click.prevent="$router.go(-1)" class="btn btn-info">Go Back</button>
         </div>
 
         <div v-if="mess" class="alert" :class="mess.includes('success') ? 'alert-success' : 'alert-danger'">
