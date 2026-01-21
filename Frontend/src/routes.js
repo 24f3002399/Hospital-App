@@ -34,13 +34,7 @@ const routes = [
     {path: "/treatment/:id", component: Treatment},
     {path: "/adminchangeav/:id", component: AdminChangeAv},
     {path: "/patientdt/:id", component: PatientDt},
-    {path: "/admindash", component: AdminDash
-        // [
-        // {path: "", component: AdminDash},
-        // {path: "/something", component: KoiDash},
-        // {path: "/someth", component: KoiDas} 
-    // ]
-    }
+    {path: "/admindash", component: AdminDash}
 ]
 
 
