@@ -59,7 +59,7 @@ export default {
             if (result) {
                 this.Book(date, id , slot)                
             } else {
-                console.log("Denied")
+                console.log("Denied Booking")
             }
         },        
     }
