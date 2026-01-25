@@ -157,7 +157,7 @@ export default {
             <div class="row">
                 <div class="col-auto me-auto"><h2>Appointment</h2></div>
                 <div class="col-auto">
-                    <select style="width: 300px; border-radius: 10px; margin-right: 50px;" v-model="search_apt_by" >
+                    <select style="width: 300px; border-radius: 10px; margin-right: 5px;" v-model="search_apt_by" >
                         <option value="upcoming">Upcoming Appointment</option> 
                         <option value="past">Past Appointment</option>
                     </select>
