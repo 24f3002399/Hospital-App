@@ -88,7 +88,10 @@ export default {
 
 <template>
     <div v-if="token" class="dash">
-        <h1>Doctor {{ userData.user_name }}</h1>
+        <div class="row" style="margin-top: 30px; margin-bottom: 20px;">
+            <div class="col-auto me-auto"><h1>Doctor {{ userData.user_name }}</h1></div>
+            <div class="col-auto"><button @click="Provide_av" class="btn btn-success">Provide Availability</button></div>
+        </div>
         <div class="row">
             <div class="col-auto me-auto"><h2>Assigned Patients </h2></div>
         </div>
@@ -139,9 +142,6 @@ export default {
                 </tr>
             </tbody>
         </table>
-        <div style="text-align: center;">
-            <button @click="Provide_av" class="btn btn-success">Provide Availability</button> 
-        </div>
     </div>
     <div v-else>
         <h1>Please Login</h1>        
