@@ -13,3 +13,7 @@ Frontend/.env
 .vscode/
 .DS_Store
 Thumbs.db
+
+#pycache
+__pycache__/
+*.pyc

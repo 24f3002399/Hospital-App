@@ -6,7 +6,7 @@ from functools import wraps
 import random
 import string
 from celery.result import AsyncResult
-from .tasks import csv_report, monthly_report, generate_msg
+from .tasks import *
 from datetime import date, timedelta, datetime
 
 def role_required(*roles):

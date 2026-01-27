@@ -2,7 +2,7 @@ from celery import shared_task
 import csv
 from jinja2 import Template
 from .mail import send_email
-from .models import Users
+from .models import *
 import datetime
 import requests
 # from flask import request
@@ -12,14 +12,14 @@ import requests
 # User(client) triggered async job 
 @shared_task(ignore_results = False, name = "download_csv_report")
 def csv_report():
-    card_details = UserCardDetail.query.all() # card details
-    csv_file_name = f"card_{datetime.datetime.now().strftime("%f")}.csv" #card_123456.csv
+    patient_history = Treatment.query.all()
+    csv_file_name = f"card_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.csv" 
     with open(f'static/{csv_file_name}', 'w', newline = "") as csvfile:
         sr_no = 1
         card_csv = csv.writer(csvfile, delimiter = ',')
         card_csv.writerow(['Sr No.', 'Attribute Name', 'Attribute Type', 'Card Name', 'User ID'])
-        for c in card_details:
-            this_card = [sr_no, c.attr_name, c.attr_val, c.cardname, c.user_id]
+        for ph in patient_history:
+            this_card = [sr_no, ph.attr_name, ph.attr_val, ph.cardname, ph.user_id]
             card_csv.writerow(this_card)
             sr_no += 1
 
