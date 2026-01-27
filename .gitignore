@@ -2,6 +2,8 @@
 Backend/.env/
 Backend/__pycache__/
 Backend/*.pyc
+Backend/application/__pycache__/
+Backend/application/*.pyc
 Backend/instance/
 
 # Frontend 
