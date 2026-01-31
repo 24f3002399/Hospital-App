@@ -7,6 +7,7 @@ Backend/application/*.pyc
 Backend/instance/
 Backend/dump.rdb
 Backend/static
+Backend/celerybeat-schedule*
 
 # Frontend 
 Frontend/node_modules/

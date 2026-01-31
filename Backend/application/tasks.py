@@ -107,7 +107,7 @@ def daily_update():
     for patient in patients:
         doctors = Doctor.query.join(Appointment).join(Patient).filter(Appointment.date == date.today()).filter(Patient.patient_id == patient.patient_id).all()
         for doctor in doctors: 
-            apt_time = Appointment.query.join(Patient).join(Doctor).filter(Doctor.doctor_id == doctor.doctor_id).filter(Appointment.date == date.today()).filter(Patient.patient_id == patient.patient_id).all()
+            apt_time = Appointment.query.join(Patient).join(Doctor).filter(Doctor.doctor_id == doctor.doctor_id).filter(Appointment.date == date.today(), Appointment.status == "booked").filter(Patient.patient_id == patient.patient_id).all()
             apt_tm = [item.time for item in apt_time]
             time_string = " and ".join(apt_tm)
             text = f"Hi {patient.name}, You have an appointment scheduled for today at { time_string } with Doctor { doctor.name}. Please remember to bring: your ID card and previous prescriptions/reports."
