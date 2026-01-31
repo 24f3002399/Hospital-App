@@ -25,8 +25,13 @@ celery.autodiscover_tasks()
 @celery.on_after_finalize.connect 
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        crontab(minute = '*/2'),
+        crontab(minute=0, hour=7, day_of_month='1'),     # (minute = '*/2') -> after every 2 minute
         monthly_report.s(),
+    )
+
+    sender.add_periodic_task(
+        crontab(minute=51, hour=10), 
+        daily_update.s()
     )
 
 from application.routes import *

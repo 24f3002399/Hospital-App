@@ -8,7 +8,9 @@ export default {
             userData: "" ,
             message: "",
             search_dept_for: "",
-            search_apt_by: "upcoming"
+            search_apt_by: "upcoming",
+            csv_Load: false,
+            csv_status: "export history as csv"
         }
     },
     mounted(){
@@ -80,6 +82,71 @@ export default {
             } else {
                 console.log("Denied")
             }
+        },
+        Export_csv: function(patient_id){
+            this.csv_Load = true;
+
+            const response = axios.get(`http://127.0.0.1:5000/api/export_csv/${patient_id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}` 
+                }
+            })
+            response
+            .then(res => {
+                   const taskID = res.data.id;
+                   this.csv_status = "Processing...."
+                   this.Download(taskID)
+            }).catch(err => {this.error = err.response.data.message
+                            this.csv_Load = false
+                            this.csv_status = "Failed"
+            })
+        },
+        Download: function(taskID){
+
+            const response = axios.get(`http://127.0.0.1:5000/api/csv_result/${taskID}`, {
+                responseType: 'blob',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}` 
+                }
+            })
+            response
+            .then(res => {
+                   if (res.status === 202) {
+                        this.csv_status = "Generating....";
+                        setTimeout(() => this.Download(taskID), 2000)
+                   }
+                   else if (res.status === 200) {
+                        this.csv_status = "Downloading...";  
+                        this.csv_Load = false;
+
+                        const blob = new Blob([res.data], { type: 'text/csv' });
+
+                        const linkUrl = window.URL.createObjectURL(blob);
+
+                        const link = document.createElement('a');
+                        link.href = linkUrl;
+                        link.setAttribute('download', `Report_${taskID}.csv`); 
+
+                        document.body.appendChild(link);
+                        link.click();
+
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(linkUrl);
+
+                        alert("File Downloaded successfully")
+                        this.csv_status = "export history as csv"         
+                   }
+
+            }).catch(err => {if (err.response && err.response.status === 202) {
+                                setTimeout(() => this.Download(taskID), 2000);}
+                else{this.error = err.response.data.message
+                            this.csv_Load = false
+                            this.csv_status = "Failed"}
+            })
         }
     },
     computed: {
@@ -125,6 +192,9 @@ export default {
                     <RouterLink :to="'/patientdt/' + userData.user_id" >
                         <button class="btn btn-outline-success">History</button>
                     </RouterLink>
+                </div>
+                <div class="col-auto">
+                    <button @click="Export_csv(userData.patient_id)" class="btn btn-outline-warning" :disabled="csv_Load">{{ csv_status }}</button>
                 </div>
             </div>
             <div class="row">

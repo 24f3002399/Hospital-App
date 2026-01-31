@@ -7,7 +7,7 @@ from jinja2 import Template
 
 SMTP_SERVER_HOST = "localhost"
 SMTP_SERVER_PORT = 1025
-SENDER_ADDRESS = "ecard@donotreply.in"
+SENDER_ADDRESS = "hospital@donotreply.in"
 SENDER_PASSWORD = ""
 
 def send_email(to_address, subject, message, content = "html", attachment_file = None):   #default content -> html

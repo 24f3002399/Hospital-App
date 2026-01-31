@@ -1,4 +1,4 @@
-from flask import current_app as app , jsonify , request , abort
+from flask import current_app as app , jsonify , request , abort, send_from_directory
 from .models import *
 from flask_jwt_extended import create_access_token , current_user , jwt_required
 from .extentions import db
@@ -582,25 +582,22 @@ def apnt_dt(id):
 
 
 # Backend Job
-@app.route('/export_csv')
-def export():
-    result = csv_report.delay()
+@app.route('/api/export_csv/<int:patient_id>')
+@role_required("patient")
+def export(patient_id):
+    result = csv_report.delay(patient_id)
     return {
         "id": result.id,
-        "result": result.result
     }
 
-@app.route('/api/csv_result/<id>')
-def csv_result(id):
-    res = AsyncResult(id)
-    # return {
-    #     "filename": res.result
-    # }
-    return send_from_directory('static', res.result)
-
-@app.route('/api/send_mail')
-def send_mail():
-    res = monthly_report.delay()
-    return {
-        "message": res.result
-    }
+@app.route('/api/csv_result/<task_id>')
+@role_required("patient")
+def csv_result(task_id):
+    res = AsyncResult(task_id)
+    if res.ready():
+        if res.successful():
+            return send_from_directory('static', res.result), 200
+        else:
+            return jsonify(message = "Failed"), 400
+    else:
+        return jsonify(message = "Pending"), 202

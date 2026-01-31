@@ -5,6 +5,8 @@ Backend/*.pyc
 Backend/application/__pycache__/
 Backend/application/*.pyc
 Backend/instance/
+Backend/dump.rdb
+Backend/static
 
 # Frontend 
 Frontend/node_modules/
@@ -19,3 +21,5 @@ Thumbs.db
 #pycache
 __pycache__/
 *.pyc
+
+dump.rdb
