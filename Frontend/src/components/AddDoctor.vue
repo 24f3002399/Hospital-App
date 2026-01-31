@@ -1,6 +1,7 @@
 <template>
     <form>
         <h1>Add a new Doctor</h1>
+        <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
         <div class="mb-3">
             <label for="Input1" class="form-label">Email</label>
             <input type="email" class="form-control" id="Input1" v-model="formData.email">
@@ -56,7 +57,8 @@ export default {
                 degree: "",
                 specialty: ""
             },
-            mess: ""
+            mess: "",
+            error: ""
         }
     },
     methods: {
@@ -73,6 +75,15 @@ export default {
                     this.mess = res.data.message
             }).catch(err => this.error = err.response.data.message)
 
+        }
+    },
+    watch: {
+        error(newValue) {
+        if (newValue) {
+            setTimeout(() => {
+            this.error = null;
+            }, 10000);
+        }
         }
     }
 }

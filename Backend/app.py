@@ -30,7 +30,7 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
     sender.add_periodic_task(
-        crontab(minute=51, hour=10), 
+        crontab(minute=0, hour=7), 
         daily_update.s()
     )
 

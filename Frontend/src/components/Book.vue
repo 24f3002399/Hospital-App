@@ -6,7 +6,8 @@ export default {
         return {
             mess: "",
             slot_detail: "",
-            patient_id: ""
+            patient_id: "",
+            error: ""
         }
     },
     mounted(){
@@ -62,6 +63,15 @@ export default {
                 console.log("Denied Booking")
             }
         },        
+    },
+    watch: {
+        error(newValue) {
+        if (newValue) {
+            setTimeout(() => {
+            this.error = null;
+            }, 10000);
+        }
+        }
     }
 }
 </script>
@@ -69,6 +79,7 @@ export default {
 <template>
     <div style="width: 60%; margin: auto;">
     <div id="head"><h2>Book Slot</h2></div>
+    <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
     <ul class="list-group list-group-flush">
         <li v-for="slot in slot_detail" style="text-align: center; padding: 10px;" class="list-group-item">
             <span class="date"><b>{{ new Date(slot.date).toLocaleDateString('en-GB')}}</b></span>

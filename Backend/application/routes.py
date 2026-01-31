@@ -3,8 +3,6 @@ from .models import *
 from flask_jwt_extended import create_access_token , current_user , jwt_required
 from .extentions import db
 from functools import wraps
-import random
-import string
 from celery.result import AsyncResult
 from .tasks import *
 from datetime import date, timedelta, datetime
@@ -179,7 +177,8 @@ def add_doct():
     user = Users.query.filter_by(email = email).first()
     if user:
         return jsonify(message = "User already exists") ,400
-    else:
+
+    if name and email and password and department and exp_year and degree and specialty:
         user = Users(name = name, email = email , password = password, role = "doctor")
         db.session.add(user)
         dept = Department.query.filter_by(department_name = department).first()
@@ -191,46 +190,72 @@ def add_doct():
             db.session.add(depart)
             db.session.commit()
 
-    n_user = Users.query.filter_by(email = email).first()
+        n_user = Users.query.filter_by(email = email).first()
 
-    new_doct = Doctor(name = name, department = department, exp_year = exp_year , user_id = n_user.id , degree = degree, specialty = specialty)
-    db.session.add(new_doct)
-    db.session.commit()
+        new_doct = Doctor(name = name, department = department, exp_year = exp_year , user_id = n_user.id , degree = degree, specialty = specialty)
+        db.session.add(new_doct)
+        db.session.commit()
 
-    return jsonify(message = "doctor added successfully")
+        return jsonify(message = "doctor added successfully")
+    
+    else:
+        return jsonify(message = "Form should not be empty") , 400
 
 @app.route("/api/editdoct/<int:id>" ,methods = ["GET", "POST"])
 @role_required("admin")
 def editdoct(id):
     user = Users.query.filter_by(id = id).first()
+    name = request.json.get("name", None)
+    department = request.json.get("department", None)
+    exp_year = request.json.get("exp_year", None)
+    degree = request.json.get("degree", None)
+    specialty = request.json.get("specialty", None)
 
     if request.method == "POST":
-        doctor = Doctor.query.filter_by(user_id = id).first()
-        doctor.name = request.json.get("name",None)
-        doctor.department = request.json.get("department", None)
-        doctor.degree = request.json.get("degree", None)
-        doctor.specialty = request.json.get("speciality", None)
-        doctor.exp_year = request.json.get("exp_year", None)
-        user.name = request.json.get("name", None)
-        db.session.commit()
+        if name and department and exp_year and degree and specialty:
+            doctor = Doctor.query.filter_by(user_id = id).first()
+            doctor.name = name
+            doctor.department = department
+            doctor.degree = degree
+            doctor.specialty = specialty
+            doctor.exp_year = exp_year
+            user.name = name
+            db.session.commit()
+            return jsonify(message = "edit successfully")
+        else:
+            return jsonify(message = "Form should not be empty") , 400
 
-    return jsonify(message = "edit successfully")
+    
 
 @app.route("/api/editpat/<int:id>" ,methods = ["GET", "POST"])
 @jwt_required()
 def editpat(id):
     patient = Patient.query.filter_by(patient_id = id).first()
-    user_id = patient.user_id
-    user = Users.query.filter_by(id = user_id).first()
+    user = Users.query.filter_by(id = patient.user_id).first()
+    name = request.json.get("name", None)
 
     if request.method == "POST":
-        user.name = request.json.get("name", None)
-        patient.name = request.json.get("name", None)
-        db.session.commit()
+        if current_user.role == "patient":
+            password = request.json.get("password", None)
+            if name and password:
+                user.password = password
+                user.name = name
+                patient.name = name
+                db.session.commit()
+                return jsonify(message = "edit successfully")
+            else:
+                return jsonify(message = "Form should not be empty") , 400
+        else:
+            if name:
+                user.name = name
+                patient.name = name
+                db.session.commit()
+                return jsonify(message = "edit successfully")
+            else:
+                return jsonify(message = "Form should not be empty") , 400
 
-    return jsonify(message = "edit successfully")
 
-@app.route("/api/delete/<int:id>" ,methods = ["GET", "POST"])
+@app.route("/api/delete/<int:id>" ,methods = ["POST"])
 @role_required("admin")
 def delete(id):
     user = Users.query.filter_by(id = id).first()
@@ -252,7 +277,7 @@ def delete(id):
 
     return jsonify(message = "Delete successfully")
 
-@app.route("/api/block/<int:id>" ,methods = ["GET", "POST"])
+@app.route("/api/block/<int:id>" ,methods = ["POST"])
 @role_required("admin")
 def Block(id):
     user = Users.query.filter_by(id = id).first()
@@ -275,7 +300,7 @@ def Block(id):
 
     return jsonify(message = "Block successfully")
 
-@app.route("/api/unblock/<int:id>" ,methods = ["GET", "POST"])
+@app.route("/api/unblock/<int:id>" ,methods = ["POST"])
 @role_required("admin")
 def unblock(id):
     user = Users.query.filter_by(id = id).first()
@@ -466,18 +491,30 @@ def book(doctor_id, patient_id, id, st, dates):
     date_n = datetime.strptime(dates, '%a, %d %b %Y %H:%M:%S %Z').date()
     if request.method == "POST":
         if st == 1:
+            apt_detail = Appointment.query.filter_by(patient_id = patient_id, time = "8 AM - 11 AM", date = date_n, status = "booked").first()
+            if apt_detail:
+                return jsonify(message = "You already booked an appointment on this time so book another slot"), 400
+            
             appointment = Appointment(patient_id = patient_id, doctor_id = doctor_id, time = "8 AM - 11 AM", date = date_n)
             db.session.add(appointment)
             slot.slot1 = "booked"
             db.session.commit()
 
         elif st == 2:
+            apt_detail = Appointment.query.filter_by(patient_id = patient_id, time = "1 PM - 4 PM", date = date_n, status = "booked").first()
+            if apt_detail:
+                return jsonify(message = "You already booked an appointment on this time so book another slot"), 400
+            
             slot.slot2 = "booked"
             appointment = Appointment(patient_id = patient_id, doctor_id = doctor_id, time = "1 PM - 4 PM", date = date_n)
             db.session.add(appointment)
             db.session.commit()
 
         else:
+            apt_detail = Appointment.query.filter_by(patient_id = patient_id, time = "6 PM - 9 PM", date = date_n, status = "booked").first()
+            if apt_detail:
+                return jsonify(message = "You already booked an appointment on this time so book another slot"), 400
+
             slot.slot3 = "booked"
             appointment = Appointment(patient_id = patient_id, doctor_id = doctor_id, time = "6 PM - 9 PM", date = date_n)
             db.session.add(appointment)

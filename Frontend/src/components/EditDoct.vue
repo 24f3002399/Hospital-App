@@ -1,7 +1,7 @@
 <template>
     <form>
         <h1>Edit</h1>
-    
+        <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
         <div class="mb-3">
             <label for="Input1" class="form-label">Fullname</label>
             <input type="text" class="form-control" id="Input1" v-model="formData.name">
@@ -54,7 +54,8 @@ export default {
                 degree: "",
                 specialty: ""
             },
-            message: ""
+            message: "",
+            error: ""
         }
     },
     methods: {
@@ -70,6 +71,15 @@ export default {
             .then(res => {
                     this.message = res.data.message
             }).catch(err => this.error = err.response.data.message)
+        }
+    },
+    watch: {
+        error(newValue) {
+        if (newValue) {
+            setTimeout(() => {
+            this.error = null;
+            }, 10000);
+        }
         }
     }
 }
