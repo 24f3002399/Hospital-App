@@ -57,7 +57,6 @@ export default{
             </div>
         </div>
         <div style="text-align: center;">
-            <!-- <button @click="LoginUser" class="btn btn-primary">Login</button> -->
              <input type="submit" class="btn btn-info" value="Register">
              <div style="text-align: center; padding: 10px;">
                 <p style="margin-right: 26%;">Already have account ?  <RouterLink to="/login">

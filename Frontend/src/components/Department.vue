@@ -99,36 +99,38 @@ export default {
                 <input type="text" style="border-radius: 10px" v-model="search_doc_for" :placeholder="`search for...`">
             </div>
         </div>
-        <table class="table table-bordered" style="text-align: center;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Action</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="doctor in doct" :key="doctor.user_id">
-                    <td>{{ doctor.id }}</td>
-                    <td>{{ doctor.name }}</td>
-                    <td><div class="row justify-content-evenly">
-                        <div class="col-4">
-                            <RouterLink :to="'/book/' + doctor.id">
-                                <button class="btn btn-success">Check Availability</button>
+        <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+            <table class="table table-bordered" style="text-align: center;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="doctor in doct" :key="doctor.user_id">
+                        <td>{{ doctor.id }}</td>
+                        <td>{{ doctor.name }}</td>
+                        <td><div class="row justify-content-evenly">
+                            <div class="col-4">
+                                <RouterLink :to="'/book/' + doctor.id">
+                                    <button class="btn btn-success">Check Availability</button>
+                                </RouterLink>
+                            </div>
+                            </div>
+                        </td>
+                        <td>
+                            <RouterLink :to="'/doctordt/' + doctor.user_id" >
+                                <button class="btn btn-warning">View</button>
                             </RouterLink>
-                        </div>
-                        </div>
-                    </td>
-                    <td>
-                        <RouterLink :to="'/doctordt/' + doctor.user_id" >
-                            <button class="btn btn-warning">View</button>
-                        </RouterLink>
-                    </td>
-                    
-                </tr>
-            </tbody>
-        </table>
+                        </td>
+                        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <div style="text-align: center; margin-top: 10px;">
             <button @click="$router.go(-1)" class="btn btn-info">Go Back</button>
         </div>

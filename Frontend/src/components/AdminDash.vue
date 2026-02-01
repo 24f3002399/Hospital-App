@@ -208,53 +208,55 @@ export default {
                     </RouterLink>
                 </div>
             </div>
-            <table class="table table-bordered" style="text-align: center;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Action</th>
-                        <th>Availability</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="doctor in doctors" :key="doctor.user_id">
-                        <td>{{ doctor.id }}</td>
-                        <td>{{ doctor.name }}</td>
-                        <td>{{ doctor.department }}</td>
-                        <td><div class="row justify-content-evenly">
-                                <div class="col-4"><RouterLink :to="'/editdoct/' + doctor.user_id">
-                                    <button class="btn btn-info">Edit</button>
-                                </RouterLink></div>
-                                <div class="col-4">
-                                    <button @click="Ask_delete(doctor.user_id)" class="btn btn-danger">Delete</button>
+            <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-bordered " style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Action</th>
+                            <th>Availability</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="doctor in doctors" :key="doctor.user_id">
+                            <td>{{ doctor.id }}</td>
+                            <td>{{ doctor.name }}</td>
+                            <td>{{ doctor.department }}</td>
+                            <td><div class="row justify-content-evenly">
+                                    <div class="col-4"><RouterLink :to="'/editdoct/' + doctor.user_id">
+                                        <button class="btn btn-info">Edit</button>
+                                    </RouterLink></div>
+                                    <div class="col-4">
+                                        <button @click="Ask_delete(doctor.user_id)" class="btn btn-danger">Delete</button>
+                                    </div>
+                                    <div class="col-4">
+                                    <div v-if="doctor.status == 'active'">
+                                        <button @click="Block(doctor.user_id)" class="btn btn-dark">Block</button>
+                                    </div>
+                                    <div v-else>
+                                        <button @click="Unblock(doctor.user_id)" class="btn btn-success">Unblock</button>
+                                    </div></div>
                                 </div>
-                                <div class="col-4">
-                                <div v-if="doctor.status == 'active'">
-                                    <button @click="Block(doctor.user_id)" class="btn btn-dark">Block</button>
-                                </div>
-                                <div v-else>
-                                    <button @click="Unblock(doctor.user_id)" class="btn btn-success">Unblock</button>
-                                </div></div>
-                            </div>
-                        </td>
-                        <td>
-                            <RouterLink :to="'/adminchangeav/' + doctor.id" >
-                                <button class="btn btn-outline-primary">Update</button>
-                            </RouterLink>
-                        </td>
-                        <td>
-                            <RouterLink :to="'/doctordt/' + doctor.user_id" >
-                                <button class="btn btn-warning">View</button>
-                            </RouterLink>
-                        </td>
-                        
-                    </tr>
-                </tbody>
-            </table>
-            <div class="row">
+                            </td>
+                            <td>
+                                <RouterLink :to="'/adminchangeav/' + doctor.id" >
+                                    <button class="btn btn-outline-primary">Update</button>
+                                </RouterLink>
+                            </td>
+                            <td>
+                                <RouterLink :to="'/doctordt/' + doctor.user_id" >
+                                    <button class="btn btn-warning">View</button>
+                                </RouterLink>
+                            </td>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" style="margin-top: 40px;">
                 <div class="col-auto me-auto"><h2>Registered Patient ( {{ Patients.length }} )</h2></div>
                 <div class="col-auto">
                     <select style="width: 130px; border-radius: 10px; margin-right: 3px;" v-model="search_pat_by">
@@ -265,46 +267,48 @@ export default {
                     <input type="text" style="border-radius: 10px" v-model="search_pat_for" :placeholder="`search ${this.search_pat_by}...`">
                 </div>
             </div>
-            <table class="table table-bordered" style="text-align: center;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Action</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="patient in Patients" :key="patient.name">
-                        <td>{{ patient.id }}</td>
-                        <td>{{ patient.name }}</td>
-                        <td><div class="row justify-content-evenly">
-                                <div class="col-4">
-                                    <RouterLink :to="'/editpat/' + patient.id">
-                                    <button class="btn btn-info">Edit</button>
-                                    </RouterLink>
+            <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-bordered" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="patient in Patients" :key="patient.name">
+                            <td>{{ patient.id }}</td>
+                            <td>{{ patient.name }}</td>
+                            <td><div class="row justify-content-evenly">
+                                    <div class="col-4">
+                                        <RouterLink :to="'/editpat/' + patient.id">
+                                        <button class="btn btn-info">Edit</button>
+                                        </RouterLink>
+                                    </div>
+                                    <div class="col-4">
+                                        <button @click="Ask_delete(patient.user_id)" class="btn btn-danger">Delete</button>
+                                    </div>
+                                    <div class="col-4">
+                                    <div v-if="patient.status == 'active'">
+                                        <button @click="Block(patient.user_id)" class="btn btn-dark">Block</button>
+                                    </div>
+                                    <div v-else>
+                                        <button @click="Unblock(patient.user_id)" class="btn btn-success">Unblock</button>
+                                    </div></div>
                                 </div>
-                                <div class="col-4">
-                                    <button @click="Ask_delete(patient.user_id)" class="btn btn-danger">Delete</button>
-                                </div>
-                                <div class="col-4">
-                                <div v-if="patient.status == 'active'">
-                                    <button @click="Block(patient.user_id)" class="btn btn-dark">Block</button>
-                                </div>
-                                <div v-else>
-                                    <button @click="Unblock(patient.user_id)" class="btn btn-success">Unblock</button>
-                                </div></div>
-                            </div>
-                        </td>
-                        <td>
-                            <RouterLink :to="'/patientdt/' + patient.user_id" >
-                                <button class="btn btn-warning">View</button>
-                            </RouterLink>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="row">
+                            </td>
+                            <td>
+                                <RouterLink :to="'/patientdt/' + patient.user_id" >
+                                    <button class="btn btn-warning">View</button>
+                                </RouterLink>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" style="margin-top: 40px;">
                 <div class="col-auto me-auto"><h2>Appointments ( {{ Appointments.length }} )</h2></div>
                 <div class="col-auto">
                     <select style="width: 300px; border-radius: 10px; margin-right: 50px;" v-model="search_apt_by" >
@@ -313,39 +317,39 @@ export default {
                     </select>
                 </div>
             </div>
-            
-            <table class="table table-bordered" style="text-align: center;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Patient Name</th>
-                        <th>Doctor Name</th>
-                        <th>Department</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="apt in Appointments" :key="apt.name">
-                        <td>{{ apt.id }}</td>
-                        <td>{{ apt.pt_name }}</td>
-                        <td>{{ apt.doct_name }}</td>
-                        <td>{{ apt.dept_name }}</td>
-                        <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
-                        <td>{{ apt.time }}</td>
-                        <td><div class="row justify-content-evenly">
+            <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-bordered" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Doctor Name</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="apt in Appointments" :key="apt.name">
+                            <td>{{ apt.id }}</td>
+                            <td>{{ apt.pt_name }}</td>
+                            <td>{{ apt.doct_name }}</td>
+                            <td>{{ apt.dept_name }}</td>
+                            <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
+                            <td>{{ apt.time }}</td>
+                            <td>
                                 <div v-if="apt.status == 'booked'">
                                     <button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button>
                                 </div>
                                 <div v-else>
                                     <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div v-else>

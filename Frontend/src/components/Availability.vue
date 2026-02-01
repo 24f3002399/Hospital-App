@@ -56,7 +56,7 @@ export default {
         <li v-for="slot in slot_detail" style="text-align: center; padding: 10px;" class="list-group-item">
             <span class="date"><b>{{ new Date(slot.date).toLocaleDateString('en-GB')}}</b></span>
             <span v-if="slot.slot1 == `available`" class="slot">
-                <button  @click="Change(slot.id, 1)" type="button" class="btn btn-outline-success" data-bs-toggle="button">8AM - 11 AM</button>
+                <button  @click="Change(slot.id, 1)" type="button" class="btn btn-outline-success" data-bs-toggle="button">8 AM - 11 AM</button>
             </span>
             <span v-else-if="slot.slot1 == `na`" class="slot">
                 <button @click="Change(slot.id, 1)" type="button" class="btn btn-outline-danger" data-bs-toggle="button">8 AM - 11 AM</button>
@@ -84,7 +84,7 @@ export default {
             </span>
         </li> 
     </ul>
-    <div style="text-align: center;">
+    <div style="text-align: center; margin-top: 20px;">
         <button @click="Save" class="btn btn-success" style="margin-right: 10px;">Save</button> 
         <RouterLink to="/doctordash" >
             <button class="btn btn-info">Go Back</button>
@@ -104,6 +104,7 @@ export default {
             width: 60% ; 
             margin: auto; 
             border-radius: 15px;
+            margin-bottom: 10px;
     }
     .slot{
         padding: 20px;

@@ -1,6 +1,7 @@
 <template>
+    <div class="form">
     <form >
-        <h1>Edit</h1>
+        <h1 style="text-align: center; color: darkolivegreen;">Edit</h1>
         <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
         <div class="mb-3">
             <label for="Input1" class="form-label">Fullname</label>
@@ -20,8 +21,8 @@
         <div v-if="message" class="alert" :class="message.includes('success') ? 'alert-success' : 'alert-danger'">
             {{ message }}
         </div>
-
     </form>
+    </div>
 </template>
 
 <script>
@@ -85,3 +86,15 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .form{
+        width: 60%;
+        margin: auto;
+        border: 2px solid green;
+        border-radius: 10px;
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-top: 10px;
+}
+</style>

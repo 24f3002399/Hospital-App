@@ -203,28 +203,29 @@ export default {
                     <input type="text" style="border-radius: 10px" v-model="search_dept_for" :placeholder="`search department...`">
                 </div>
             </div>
-            <table class="table table-bordered" style="text-align: center;">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="depart in department">
-                        <td>{{ depart.name }}</td>
-                        <td><div class="row justify-content-evenly">
-                                <div class="col-4">
-                                    <RouterLink :to="'/department/' + depart.name">
-                                        <button class="btn btn-info">View Details</button>
-                                    </RouterLink>
-                                </div>                              
-                            </div>
-                        </td>                       
-                    </tr>
-                </tbody>
-            </table>
-            <div class="row">
+            <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-bordered" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>Sr.No.</th>
+                            <th>Name</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(depart, index) in department">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ depart.name }}</td>
+                            <td>
+                                <RouterLink :to="'/department/' + depart.name">
+                                    <button class="btn btn-info">View Details</button>
+                                </RouterLink>
+                            </td>                       
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row" style="margin-top: 30px;">
                 <div class="col-auto me-auto"><h2>Appointment</h2></div>
                 <div class="col-auto">
                     <select style="width: 300px; border-radius: 10px; margin-right: 5px;" v-model="search_apt_by" >
@@ -233,37 +234,38 @@ export default {
                     </select>
                 </div>
             </div>
-            
-            <table class="table table-bordered" style="text-align: center;">
-                <thead>
-                    <tr>
-                        <th>Sr. No.</th>
-                        <th>Doctor Name</th>
-                        <th>Department</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(apt, index) in Appointments">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ apt.doct_name }}</td>
-                        <td>{{ apt.dept_name }}</td>
-                        <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
-                        <td>{{ apt.time }}</td>
-                        <td>
-                            <div class="row justify-content-evenly" v-if="apt.status == 'booked' && search_apt_by == 'upcoming'">
-                                <div class="col-4"><button @click="Ask_res(apt.id, apt.doct_id)" class="btn btn-warning">Reschedule</button></div>
-                                <div class="col-4"><button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button></div>
-                            </div>
-                            <div class="justify-content-evenly" v-else>
-                                <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-bordered" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>Sr. No.</th>
+                            <th>Doctor Name</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(apt, index) in Appointments">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ apt.doct_name }}</td>
+                            <td>{{ apt.dept_name }}</td>
+                            <td>{{ apt.date.split(' ').slice(1, 4).join(' ') }}</td>
+                            <td>{{ apt.time }}</td>
+                            <td>
+                                <div class="row justify-content-evenly" v-if="apt.status == 'booked' && search_apt_by == 'upcoming'">
+                                    <div class="col-2"><button @click="Ask_res(apt.id, apt.doct_id)" class="btn btn-warning">Reschedule</button></div>
+                                    <div class="col-2"><button @click="Ask_cancel(apt.id)" class="btn btn-danger">Cancel</button></div>
+                                </div>
+                                <div v-else>
+                                    <button class="btn btn-secondary" disabled>{{ apt.status }}</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div v-else>

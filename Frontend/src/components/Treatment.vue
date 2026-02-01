@@ -1,8 +1,11 @@
 <template>
-    <form>
-        <h1>Treatment</h1>
+    <div>
+    <form class="form">
+        <div class="head">
+        <h1 style="color:darkslategrey">Treatment</h1>
         <h4>Patient Name : {{ this.patient_name }}</h4>
         <h4>Department : {{ this.department }}</h4>
+        </div>
         <div class="mb-3">
             <label for="Input1" class="form-label">Visit Type</label>
             <select v-model="formData.visit_type" class="form-select" required id="Input1">
@@ -42,6 +45,7 @@
             {{ mess }}
         </div>
     </form>
+    </div>
 </template>
 
 <script>
@@ -97,3 +101,19 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .form{
+        width: 60%;
+        margin: auto;
+        border: 2px solid green;
+        border-radius: 10px;
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-top: 10px;
+    }
+    .head{
+        text-align: center;
+        color:darkred;
+    }
+</style>

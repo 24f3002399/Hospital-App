@@ -1,6 +1,7 @@
 <template>
+    <div class="form">
     <form>
-        <h1>Add a new Doctor</h1>
+        <h1 style="text-align: center; color: darkolivegreen;">Add a new Doctor</h1>
         <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
         <div class="mb-3">
             <label for="Input1" class="form-label">Email</label>
@@ -15,7 +16,7 @@
             <input type="text" class="form-control" id="Input3" v-model="formData.name">
         </div>
         <div class="mb-3">
-            <label for="Input4" class="form-label">Departrment</label>
+            <label for="Input4" class="form-label">Department</label>
             <input type="text" class="form-control" id="Input4" v-model="formData.department" >
         </div>
         <div class="mb-3">
@@ -41,6 +42,7 @@
             {{ mess }}
         </div>
     </form>
+    </div>
 </template>
 
 <script>
@@ -88,3 +90,15 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .form{
+        width: 60%;
+        margin: auto;
+        border: 2px solid green;
+        border-radius: 10px;
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-top: 10px;
+}
+</style>
