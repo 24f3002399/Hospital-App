@@ -1,11 +1,12 @@
 from flask import current_app as app , jsonify , request , abort, send_from_directory
 from .models import *
 from flask_jwt_extended import create_access_token , current_user , jwt_required
-from .extentions import db
+from .extentions import db, cache
 from functools import wraps
 from celery.result import AsyncResult
 from .tasks import *
 from datetime import date, timedelta, datetime
+import time
 
 def role_required(*roles):
     def wrapper(fn):
@@ -195,7 +196,7 @@ def add_doct():
         new_doct = Doctor(name = name, department = department, exp_year = exp_year , user_id = n_user.id , degree = degree, specialty = specialty)
         db.session.add(new_doct)
         db.session.commit()
-
+        cache.delete_memoized(dept_doctor, department)
         return jsonify(message = "doctor added successfully")
     
     else:
@@ -221,6 +222,8 @@ def editdoct(id):
             doctor.exp_year = exp_year
             user.name = name
             db.session.commit()
+            cache.delete_memoized(detail, id)
+            cache.delete_memoized(dept_doctor, department)
             return jsonify(message = "edit successfully")
         else:
             return jsonify(message = "Form should not be empty") , 400
@@ -242,6 +245,7 @@ def editpat(id):
                 user.name = name
                 patient.name = name
                 db.session.commit()
+                cache.delete_memoized(detail, patient.user_id)
                 return jsonify(message = "edit successfully")
             else:
                 return jsonify(message = "Form should not be empty") , 400
@@ -250,6 +254,7 @@ def editpat(id):
                 user.name = name
                 patient.name = name
                 db.session.commit()
+                cache.delete_memoized(detail, patient.user_id)
                 return jsonify(message = "edit successfully")
             else:
                 return jsonify(message = "Form should not be empty") , 400
@@ -261,12 +266,13 @@ def delete(id):
     user = Users.query.filter_by(id = id).first()
     if user.role == "doctor":
         doctor = Doctor.query.filter_by(user_id = id).first()
-        Depart = Department.query.filter_by(department_name = doctor.department).first()
+        depart = Department.query.filter_by(department_name = doctor.department).first()
         if request.method == "POST":
             db.session.delete(doctor)
             db.session.delete(user)
-            Depart.doctor_registered -= 1
+            depart.doctor_registered -= 1
             db.session.commit()
+            cache.delete_memoized(dept_doctor, doctor.department)
     
     if user.role == "patient":
         patient = Patient.query.filter_by(user_id = id).first()
@@ -290,6 +296,7 @@ def Block(id):
             user.status = "block"
             Depart.doctor_registered -= 1
             db.session.commit()
+            cache.delete_memoized(dept_doctor, doctor.department)
 
     if user.role == "patient":
         patient = Patient.query.filter_by(user_id = id).first()
@@ -313,6 +320,7 @@ def unblock(id):
             user.status = "active"
             Depart.doctor_registered += 1
             db.session.commit()
+            cache.delete_memoized(dept_doctor, doctor.department)
 
     if user.role == "patient":
         patient = Patient.query.filter_by(user_id = id).first()
@@ -382,8 +390,10 @@ def save(doctor_id, id, st):
 
 
 @app.route("/api/detail/<int:id>")
+@cache.memoize(timeout=0)
 @jwt_required()
 def detail(id):
+    # time.sleep(5)  -> for demonstration
     user = Users.query.filter_by(id = id).first()
     if user:
         if user.role == "doctor":
@@ -449,8 +459,10 @@ def detail(id):
 
 
 @app.route("/api/dept_doctor/<name>")
+@cache.memoize(timeout=0)
 @jwt_required()
 def dept_doctor(name):
+    # time.sleep(5) -> for demonstration
     doctors = Doctor.query.filter_by(department = name, status = "active").all()
     reg_doct_json = []
     for doctor in doctors:
@@ -526,6 +538,7 @@ def book(doctor_id, patient_id, id, st, dates):
 @jwt_required()
 def cancel(id):
     appointment = Appointment.query.filter_by(id = id).first()
+    user_id = appointment.patient.user_id
     doctor_id = appointment.doctor_id
     date = appointment.date
     time = appointment.time
@@ -543,6 +556,7 @@ def cancel(id):
         slot.slot3 = "available"
         db.session.commit()
 
+    cache.delete_memoized(detail, user_id)
     return jsonify(message = "Cancel successfully")
 
 @app.route("/api/reschedule/<int:id>" ,methods = ["POST"])
@@ -583,6 +597,7 @@ def treatment(id):
         db.session.add(treatment)
     
         appointment = Appointment.query.filter_by(id = id).first()
+        patient_user_id = appointment.patient.user_id
         doctor_id = appointment.doctor_id
         date = appointment.date
         time = appointment.time
@@ -600,6 +615,7 @@ def treatment(id):
             slot.slot3 = "complete"
             db.session.commit()
 
+        cache.delete_memoized(detail, patient_user_id)
         return jsonify(message = "Treatment successfully")
 
 
@@ -615,6 +631,14 @@ def apnt_dt(id):
         "department": department
     })
 
+
+
+# Caching
+@app.route("/api/clear-cache" ,methods = ["POST"])
+@role_required("admin")
+def clear_cache():
+    cache.clear()
+    return "All cache cleared!"
 
 
 

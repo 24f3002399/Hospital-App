@@ -1,6 +1,6 @@
 from flask import Flask 
 from application.config import LocalDevelopmentConfig
-from application.extentions import db
+from application.extentions import db, cache
 from application.models import Users
 from application.security import jwt
 from flask_cors import CORS
@@ -14,6 +14,7 @@ def create_app():
     app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
     jwt.init_app(app)
+    cache.init_app(app)
     CORS(app)
     app.app_context().push()
     return app

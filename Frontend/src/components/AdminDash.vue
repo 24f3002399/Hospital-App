@@ -111,7 +111,28 @@ export default {
             } else {
                 console.log("Denied")
             }
-        }
+        },
+        Cache_clear: function() {
+            const response = axios.post(`http://127.0.0.1:5000/api/clear-cache`, {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
+            response
+            .then(res => {
+                    alert("Cache cleared successfully")
+            }).catch(err => this.error = err.response.data.message)
+        },
+        Ask_cache_clear: function() {
+            const result = confirm("Are you want to clear the cache");
+            if (result) {
+                this.Cache_clear()                
+            } else {
+                console.log("Denied")
+            }
+        },
     },
     computed: {
         doctors(){
@@ -167,8 +188,9 @@ export default {
 <template>
     <div v-if="token">
         <div class="dash">
-            <div style="display: flex;margin-bottom: 20px;">
-                <h3 style="color:darkorange; display: inline;"><b>Welcome {{ userData.user_name }}</b></h3>
+            <div style="display: flex;margin-bottom: 20px;" class="row">
+                <div class="col-auto me-auto"><h3 style="color:darkorange; display: inline;"><b>Welcome {{ userData.user_name }}</b></h3></div>
+                <div class="col-auto"><button @click="Ask_cache_clear" class="btn btn-outline-warning">Clear the Cache</button> </div>
             </div>
             <div class="row">
                 <div class="col-auto me-auto"><h2>Registered Doctor ( {{ doctors.length }} )</h2></div>
