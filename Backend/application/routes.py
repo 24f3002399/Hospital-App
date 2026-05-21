@@ -62,9 +62,18 @@ def dashboard():
         for appointment in appointment:
             appt_detail = {}
             appt_detail["id"] = appointment.id
-            appt_detail["pt_name"] = appointment.patient.name
-            appt_detail["doct_name"] = appointment.doctor.name
-            appt_detail["dept_name"] = appointment.doctor.department
+            if appointment.patient and appointment.patient.name:
+                appt_detail["pt_name"] = appointment.patient.name
+            else:
+                appt_detail["pt_name"] = "Not Available"
+            if appointment.doctor and appointment.doctor.name:
+                appt_detail["doct_name"] = appointment.doctor.name
+            else:
+                appt_detail["doct_name"] = "Not Available"
+            if appointment.doctor and appointment.doctor.department:
+                appt_detail["dept_name"] = appointment.doctor.department
+            else:
+                appt_detail["dept_name"] = "Not Available"
             appt_detail["status"] = appointment.status
             appt_detail["date"] = appointment.date
             appt_detail["time"] = appointment.time
@@ -93,7 +102,10 @@ def dashboard():
         for appointment in appointment:
             appt_detail = {}
             appt_detail["id"] = appointment.id
-            appt_detail["pt_name"] = appointment.patient.name
+            if appointment.patient and appointment.patient.name:
+                appt_detail["pt_name"] = appointment.patient.name
+            else:
+                appt_detail["pt_name"] = "Not Available"
             appt_detail["date"] = appointment.date
             appt_detail["time"] = appointment.time
             apnt_json.append(appt_detail)
@@ -116,9 +128,18 @@ def dashboard():
         for appointment in appointment:
             appt_detail = {}
             appt_detail["id"] = appointment.id
-            appt_detail["doct_name"] = appointment.doctor.name
-            appt_detail["doct_id"] = appointment.doctor.doctor_id
-            appt_detail["dept_name"] = appointment.doctor.department
+            if appointment.doctor and appointment.doctor.name:
+                appt_detail["doct_name"] = appointment.doctor.name
+            else:
+                appt_detail["doct_name"] = "Not Available"
+            if appointment.doctor and appointment.doctor.doctor_id:
+                appt_detail["doct_id"] = appointment.doctor.doctor_id
+            else:
+                appt_detail["doct_id"] = "Not Available"
+            if appointment.doctor and appointment.doctor.department:
+                appt_detail["dept_name"] = appointment.doctor.department
+            else:
+                appt_detail["dept_name"] = "Not Available"
             appt_detail["date"] = appointment.date
             appt_detail["time"] = appointment.time
             appt_detail["status"] = appointment.status
@@ -267,18 +288,27 @@ def delete(id):
     if user.role == "doctor":
         doctor = Doctor.query.filter_by(user_id = id).first()
         depart = Department.query.filter_by(department_name = doctor.department).first()
+        slots = Slots.query.filter_by(doctor_id = doctor.doctor_id).all()
+        apnt = Appointment.query.filter_by(doctor_id = doctor.doctor_id).all()
         if request.method == "POST":
             db.session.delete(doctor)
             db.session.delete(user)
+            for apt in apnt:
+                apt.status = "cancelled"
+            for slot in slots:
+                db.session.delete(slot)                  
             depart.doctor_registered -= 1
             db.session.commit()
             cache.delete_memoized(dept_doctor, doctor.department)
     
     if user.role == "patient":
         patient = Patient.query.filter_by(user_id = id).first()
+        apnt = Appointment.query.filter_by(patient_id = patient.patient_id).all()
         if request.method == "POST":
             db.session.delete(patient)
             db.session.delete(user)
+            for apt in apnt:
+                apt.status = "cancelled"
             db.session.commit()
 
     return jsonify(message = "Delete successfully")

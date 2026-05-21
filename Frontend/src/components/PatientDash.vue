@@ -10,7 +10,8 @@ export default {
             search_dept_for: "",
             search_apt_by: "upcoming",
             csv_Load: false,
-            csv_status: "export history as csv"
+            csv_status: "export history as csv",
+            error: ""
         }
     },
     mounted(){
@@ -144,8 +145,9 @@ export default {
             }).catch(err => {if (err.response && err.response.status === 202) {
                                 setTimeout(() => this.Download(taskID), 2000);}
                 else{this.error = err.response.data.message
+                            this.error = "Failed"
                             this.csv_Load = false
-                            this.csv_status = "Failed"}
+                            this.csv_status = "export history as csv"}
             })
         }
     },
@@ -174,6 +176,15 @@ export default {
                 }
             })
         }
+    },
+    watch: {
+        error(newValue) {
+        if (newValue) {
+            setTimeout(() => {
+            this.error = null;
+            }, 5000);
+        }
+        }
     }
 }
 </script>
@@ -182,6 +193,7 @@ export default {
     <div v-if="token">
         <div class="dash">
             <div style="margin-bottom: 20px;" class="row">
+                <div v-if="error" style="text-align: center; color: red;">{{ error }}</div>
                 <div class="col-auto me-auto"><h3 style="color:darkorange; display: inline;"><b>Welcome {{ userData.user_name }}</b></h3></div>
                 <div class="col-auto" style="float: left;">
                     <RouterLink :to="'/editpat/' + userData.patient_id">

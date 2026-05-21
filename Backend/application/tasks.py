@@ -11,7 +11,7 @@ import requests
 @shared_task(ignore_results = False, name = "download_csv_report")
 def csv_report(patient_id):
     treatment = Treatment.query.join(Appointment).filter(Appointment.patient_id == patient_id).all()
-    csv_file_name = f"card_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.csv" 
+    csv_file_name = f"report_{patient_id}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.csv" 
     with open(f'static/{csv_file_name}', 'w', newline = "") as csvfile:
         sr_no = 1
         card_csv = csv.writer(csvfile, delimiter = ',')
@@ -24,7 +24,7 @@ def csv_report(patient_id):
     return csv_file_name
 
 
-# task 2 - Monthly report sent via mail 
+# task 2 - Monthly report sent via mail   
 @shared_task(ignore_results = False, name = "monthly_report")
 def monthly_report():
     doctors = Users.query.filter_by(role = "doctor").all()
